@@ -9,14 +9,18 @@
 
 echo $HOSTNAME
 
+# to insure work with python3
 source /users/home/cat3/.bashrc
 
+# activate environment
 conda activate gtdbtk
 
+# set working directory
 WD=/users/work/cat3/projects/mime/results/de_novo_wf
 GENOMES_DIR=$WD/bottom-arch-mags/
 OUTDIR=$WD/bottom-arch-tree/
 
+# path to database
 GTDBTK_DATA_PATH=/users/work/cat3/db/gtdbk
 
 cd $WD
