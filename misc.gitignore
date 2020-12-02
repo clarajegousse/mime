@@ -1,0 +1,9 @@
+# sequence data file
+*.fastq.gz
+*.fa
+
+# bowtie2-build files
+*.bt2
+
+# anvio db file
+*.db
