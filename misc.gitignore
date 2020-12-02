@@ -1,9 +1,17 @@
 # sequence data file
 *.fastq.gz
+*.fasta
+*.fna
 *.fa
+
+# gene feature ffiles
+*.gff
 
 # bowtie2-build files
 *.bt2
 
 # anvio db file
 *.db
+
+# all logs
+*.log
