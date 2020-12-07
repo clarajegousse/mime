@@ -28,7 +28,7 @@ library(extrafont)
 
 # ------ IMPORT DATA -----
 
-file.path <- "~/Projects/mime/results/coassembly/coassembly_wgs_surface/summary/metabat2/bins_summary.txt"
+file.path <- "https://raw.githubusercontent.com/clarajegousse/mime/main/results/coassembly/coassembly_wgs_surface/summary/metabat2/bins_summary.txt"
 df <- read.table(file.path, 
                  header = TRUE, 
                  sep = "\t", 
