@@ -2,9 +2,9 @@
 
 # ------ PRELIMINARY SETTINGS ------
 
+library(devtools)
 # import colours to remain consistent between all plots
-source("/Users/Clara/Projects/colors/colors.R")
-source("/Users/Clara/Projects/colors/colors2.R")
+source_url("https://raw.githubusercontent.com/clarajegousse/colors/master/colors.R")
 
 # set working directory
 setwd("~/mime/results/simkamin")
