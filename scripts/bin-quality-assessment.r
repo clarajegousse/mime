@@ -7,7 +7,7 @@ library(devtools)
 source_url("https://raw.githubusercontent.com/clarajegousse/colors/master/colors.R")
 
 # set the directory to save img
-img.path = "/Users/Clara/Projects/diary/graphics/plots/"
+img.path = "~/graphics/"
 
 library(stringr)
 today <- str_replace_all(Sys.Date(), "-", "") # concatenate the date following the format "yyyymmdd"
@@ -21,8 +21,6 @@ library(ggrepel)
 library(ggplot2)
 library(cowplot)
 library(extrafont)
-
-# ----- TRANSFER DATA FROM GARPUR TO LOCAL -----
 
 # ------ SURFACE ---------
 
@@ -53,6 +51,7 @@ df$quality <- "bad"
 
 df[df$percent_completion >= 50 & df$percent_redundancy <= 10,]$quality <- "good"
 
+# alternative classification system
 # df[df$percent_completion >= 50 & df$percent_redundancy <= 4,]$quality <- "partial"
 # df[df$percent_completion >= 70 & df$percent_redundancy <= 10,]$quality <- "medium"
 # df[df$percent_completion >= 90 & df$percent_redundancy <= 5,]$quality <- "near complete"
@@ -60,22 +59,26 @@ df[df$percent_completion >= 50 & df$percent_redundancy <= 10,]$quality <- "good"
 df$quality <- as.factor(df$quality)
 df$quality <- ordered(df$quality)
 
-# df$quality <- ordered(df$quality, levels = c("bad", "partial", "medium", "near complete"))
 df$quality <- ordered(df$quality, levels = c("bad", "good"))
 
+# alternative order
+# df$quality <- ordered(df$quality, levels = c("bad", "partial", "medium", "near complete"))
 
 table(df$quality)
 
 lvls = levels(as.factor(df$quality))
 labels = paste(lvls," (",table(df$quality),")",sep="")
+col.palette <- c(Grapefruit, Mint)
+
+# alternative colour palettes
 # col.palette <- c(HIred, HIorange, HIyellow, HIgreen)
 # col.palette <- c(Grapefruit, Orange, Sunflower, Grass)
-col.palette <- c(Grapefruit, Mint)
 
 df.surface <- df
 
 # ----- HISTOGRAM -----
 
+# main plot
 pmain <- ggplot(df, aes(x = percent_completion, 
                         y = percent_redundancy, 
                         fill = quality, 
@@ -85,12 +88,10 @@ pmain <- ggplot(df, aes(x = percent_completion,
   ylab(c("Redundancy (%)")) +
   xlab(c("Completion (%)")) +
   labs(fill= "Quality", size = "Total length (pb)") +
-  #rremove("legend.title") +
   theme(panel.border = element_rect(colour = "black", fill=NA, size=.8),
         axis.line = element_line(size=0,color="red"),
         axis.ticks = element_line(size=.5,color="black"),
         axis.ticks.length=unit(0.2,"cm"),
-        #legend.position = c(0.2, 0.7),
         legend.position = "right",
         text=element_text(family="Frutiger"))  + font("xylab",size = 20, face = "bold") +
   font("xy", size=12, face = "bold") +
@@ -101,7 +102,7 @@ pmain <- ggplot(df, aes(x = percent_completion,
   annotate("rect", xmin = 49, xmax = 101, ymin = -1, ymax = 10, 
            linetype = 1, size = .5, color = "black", alpha = 0) + ylim(0, 101)
 
-
+# histograms
 xhist <- axis_canvas(pmain, axis = "x")+
   geom_histogram(data = df, aes(x = percent_completion, fill = quality),
                  size = .5, color = "black") +
@@ -113,6 +114,7 @@ yhist <- axis_canvas(pmain, axis = "y", coord_flip = TRUE)+
   scale_fill_manual(values = col.palette) +
   coord_flip()
 
+# fit histograms to main plot
 p1 <- insert_xaxis_grob(pmain, xhist, grid::unit(.2, "null"), position = "top")
 p2 <- insert_yaxis_grob(p1, yhist, grid::unit(.2, "null"), position = "right")
 
@@ -121,11 +123,12 @@ final
 
 plot1.surface <- final
 plot1.surface
-# save as svg heigh=600
 
 # file.format <- "png"
 # file.name <- paste(img.path, today, "_coassembly_wgs_surface_assessment_of_bins_quality_metabat2.", file.format, sep="", collapse=NULL)
 # ggsave(final, file=file.name, dpi = 300, units = "cm", width = 22)
+
+# NB: save as svg heigh=600
 
 # ----- FOCUS ON MOCK -----
 
@@ -159,7 +162,8 @@ df.mags[df.mags$taxon %in% mock.genus,]$community <- "mock"
 `%notin%` <- Negate(`%in%`)
 df.mags[df.mags$taxon %notin% mock.genus,]$community <- "natural"
 
-# corrections
+# ---- Adjustments based on visualisation with Anvio ----
+
 # METABAT__176 is clearly not in the mock community according to differential coverage
 df.mags[df.mags$bins == "METABAT__176",]$community <- "natural"
 
@@ -168,10 +172,10 @@ df.mags[df.mags$bins == "METABAT__221",]$taxon <- "Escherichia"
 
 df.mags[df.mags$bins == "METABAT__203",]$community <- "mock" # Geobacillus
 df.mags[df.mags$bins == "METABAT__140",]$community <- "mock" # Pseudomonas
+
 table(df.mags$community)
 lvls2 = levels(as.factor(df.mags$community))
 labels2 = paste(lvls2," (",table(df.mags$community),")",sep="")
-
 
 pmain <- ggplot(df.mags, aes(x = percent_completion, 
                         y = percent_redundancy, 
@@ -180,7 +184,6 @@ pmain <- ggplot(df.mags, aes(x = percent_completion,
                         size = total_length)) +
   geom_point(aes(fill = community), shape = 21, stroke = 1) + theme_pubr() + theme(aspect.ratio=1) +
   scale_fill_manual(values = col.palette, labels = labels2) +
-  #scale_shape_manual(values=c(21, 23), labels = labels2) +
   ylab(c("Redundancy (%)")) +
   xlab(c("Completion (%)")) +
   labs(fill= "Community", size = "Total length (pb)") +
@@ -210,7 +213,8 @@ plot2.surface
 
 # ------ IMPORT DATA -----
 
-file.path <- "~/Projects/mime/results/coassembly/coassembly_wgs_bottom/bins_summary.txt"
+file.path <- "https://raw.githubusercontent.com/clarajegousse/mime/main/results/coassembly/coassembly_wgs_seafloor/summary/metabat2/bins_summary.txt"
+
 df <- read.table(file.path, 
                  header = TRUE, 
                  sep = "\t", 
@@ -235,24 +239,28 @@ df$quality <- "bad"
 
 df[df$percent_completion >= 50 & df$percent_redundancy <= 10,]$quality <- "good"
 
+# alternative classification system
 #df[df$percent_completion >= 50 & df$percent_redundancy <= 4,]$quality <- "partial"
 #df[df$percent_completion >= 70 & df$percent_redundancy <= 10,]$quality <- "medium"
 #df[df$percent_completion >= 90 & df$percent_redundancy <= 5,]$quality <- "near complete"
 
 df$quality <- as.factor(df$quality)
 df$quality <- ordered(df$quality)
-# df$quality <- ordered(df$quality, levels = c("bad", "partial", "medium", "near complete"))
 
 df$quality <- ordered(df$quality, levels = c("bad", "good"))
-
-
 table(df$quality)
+
+# alternative classification system
+# df$quality <- ordered(df$quality, levels = c("bad", "partial", "medium", "near complete"))
 
 lvls = levels(as.factor(df$quality))
 labels = paste(lvls," (",table(df$quality),")",sep="")
+
+col.palette <- c(Grapefruit, Mint)
+
+# alternative classification system
 # col.palette <- c(HIred, HIorange, HIyellow, HIgreen)
 # col.palette <- c(Grapefruit, Orange, Sunflower, Grass)
-col.palette <- c(Grapefruit, Mint)
 
 df.seafloor <- df
 
@@ -267,7 +275,6 @@ pmain <- ggplot(df, aes(x = percent_completion,
   ylab(c("Redundancy (%)")) +
   xlab(c("Completion (%)")) +
   labs(fill= "Quality", size = "Total length (pb)") +
-  #rremove("legend.title") +
   theme(panel.border = element_rect(colour = "black", fill=NA, size=.8),
         axis.line = element_line(size=0,color="red"),
         axis.ticks = element_line(size=.5,color="black"),
@@ -341,7 +348,8 @@ df.mags[df.mags$taxon %in% mock.genus,]$community <- "mock"
 df.mags[df.mags$taxon %notin% mock.genus,]$community <- "natural"
 
 
-# corrections
+# Adjustments based on visualisations with Anvio
+
 # METABAT__176 is clearly not in the mock community according to differential coverage
 df.mags[df.mags$bins == "METABAT__138",]$community <- "mock" # Eschierichia coli
 df.mags[df.mags$bins == "METABAT__138",]$taxon <- "Escherichia"
@@ -349,7 +357,6 @@ df.mags[df.mags$bins == "METABAT__138",]$taxon <- "Escherichia"
 table(df.mags$community)
 lvls2 = levels(as.factor(df.mags$community))
 labels2 = paste(lvls2," (",table(df.mags$community),")",sep="")
-
 
 pmain <- ggplot(df.mags, aes(x = percent_completion, 
                              y = percent_redundancy, 
@@ -389,7 +396,6 @@ plot2.bottom
 plot_grid(plot1.surface, plot1.bottom,
   labels = "AUTO")
 
-
 plot_grid(plot2.surface, plot2.bottom,
           labels = "AUTO")
 
@@ -422,7 +428,7 @@ df.seafloor[df.seafloor$taxon %in% mock.genus,]$community <- "mock"
 `%notin%` <- Negate(`%in%`)
 df.seafloor[df.seafloor$taxon %notin% mock.genus,]$community <- "natural"
 
-# corrections
+# Adjustments
 # METABAT__176 is clearly not in the mock community according to differential coverage
 df.seafloor[df.seafloor$bins == "METABAT__138",]$community <- "mock" # Eschierichia coli
 df.seafloor[df.seafloor$bins == "METABAT__138",]$taxon <- "Escherichia"
@@ -437,15 +443,8 @@ df[df$taxon %notin% mock.genus,]$community <- "natural"
 
 # chi square test
 
-# H0: The two variables are independent // the quality of the bins and the env. are independant
-# H1: The two variables relate to each other // the quality of the bins depends on the environment
-
 table(df$quality, df$cat)
 chisq.test(df$quality, df$cat, correct=TRUE)
-
-# We have a chi-squared value of 0.27784 and 
-# since we get a p-Value above than the significance level of 0.05, 
-# we cannot reject the null hypothesis and conclude that the two variables are in fact dependant
 
 table(df[df$quality=="good",]$community, df[df$quality=="good",]$cat)
 chisq.test(df[df$quality=="good",]$community, df[df$quality=="good",]$cat, correct=TRUE)
