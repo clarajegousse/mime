@@ -1,1 +1,0 @@
-contigs	hmm_profile	unique_identifier
